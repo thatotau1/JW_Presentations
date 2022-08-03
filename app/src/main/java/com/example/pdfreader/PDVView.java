@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -19,7 +20,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PDVView extends Activity {
+public class PDVView extends Activity implements PDFSelectedListener{
 
     private PDFAdapter pdfAdapter;
     private List<File> pdfList;
@@ -71,7 +72,12 @@ public class PDVView extends Activity {
         }
 
 
-        pdfAdapter = new PDFAdapter(this, pdfList);
+        pdfAdapter = new PDFAdapter(this, pdfList, this);
         recyclerView.setAdapter(pdfAdapter);
+    }
+
+    @Override
+    public void onPDFSelected(File file) {
+        startActivity(new Intent(PDVView.this, PresentationActivity.class).putExtra("path", file.getAbsolutePath()));
     }
 }

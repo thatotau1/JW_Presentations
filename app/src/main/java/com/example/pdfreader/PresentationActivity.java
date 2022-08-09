@@ -3,10 +3,16 @@ package com.example.pdfreader;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.View;
 
 import com.github.barteksc.pdfviewer.PDFView;
 import com.github.barteksc.pdfviewer.listener.OnDrawListener;
@@ -17,10 +23,12 @@ import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 
 import java.io.File;
 
-public class PresentationActivity extends AppCompatActivity implements OnDrawListener, OnPageChangeListener, OnLoadCompleteListener {
+public class PresentationActivity extends AppCompatActivity implements  OnPageChangeListener {
     String pdfPath = "";
     private int mCurrentPage = 0;
     PDFView pdfView;
+    private PaintView paintView;
+    boolean isDrawInit = false;
     private final static String KEY_CURRENT_PAGE = "current_page";
 
 
@@ -49,12 +57,23 @@ public class PresentationActivity extends AppCompatActivity implements OnDrawLis
         Uri path = Uri.fromFile(file);
         pdfView.fromUri(path)
                 .swipeHorizontal(false)
-                .onDraw(this)
+                .onDrawAll(new OnDrawListener() {
+                    @Override
+                    public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
+                        Bitmap bitmap = Bitmap.createBitmap(canvas.getWidth(), canvas.getHeight(), Bitmap.Config.ARGB_8888);
+
+                        Paint paint = new Paint();
+                        paint.setColor(Color.BLACK);
+                        canvas.drawBitmap(bitmap, 0,0, paint);
+
+                    }
+                })
                 .defaultPage(mCurrentPage)
                 .onRender(new OnRenderListener() {
                     @Override
                     public void onInitiallyRendered(int nbPages, float pageWidth, float pageHeight) {
                         pdfView.fitToWidth(mCurrentPage);
+
 
                     }
                 })
@@ -63,15 +82,11 @@ public class PresentationActivity extends AppCompatActivity implements OnDrawLis
                 .enableSwipe(true)
                 .enableDoubletap(true)
                 .spacing(2)
-                .onLoad(this)
                 .load();
 
     }
 
-    @Override
-    public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
 
-    }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState)
@@ -91,13 +106,41 @@ public class PresentationActivity extends AppCompatActivity implements OnDrawLis
     @Override
     public void onPageChanged(int page, int pageCount) {
         mCurrentPage = page;
-        setTitle(String.format("%s %s / %s", "Page Number", page + 1, pageCount));
+        setTitle(String.format("%s %s of %s", "Slide", page + 1, pageCount));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+            initDraw();
+            isDrawInit = true;
+
     }
 
 
-    @Override
-    public void loadComplete(int nbPages) {
-        Log.d("Broski","Saved Page " + mCurrentPage);
 
+    public void onInitDrawClick(View view) {
+    }
+
+    private void initDraw(){
+        paintView = findViewById(R.id.paintView);
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getRealMetrics(metrics);
+        paintView.init(metrics);
+
+    }
+
+
+    static class FingerPath {
+        int colour;
+        int strokeWidth;
+        Path path;
+
+        FingerPath(int colour, int strokeWidth, Path path) {
+            this.colour = colour;
+            this.strokeWidth = strokeWidth;
+            this.path = path;
+            Log.d("On Touch","X"+strokeWidth+"y"+path);
+        }
     }
 }

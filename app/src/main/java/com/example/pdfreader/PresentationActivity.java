@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 
 import com.github.barteksc.pdfviewer.PDFView;
 import com.github.barteksc.pdfviewer.listener.OnDrawListener;
@@ -23,13 +24,16 @@ import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 
 import java.io.File;
 
-public class PresentationActivity extends AppCompatActivity implements  OnPageChangeListener {
+public class PresentationActivity extends AppCompatActivity implements OnPageChangeListener, View.OnClickListener {
     String pdfPath = "";
     private int mCurrentPage = 0;
     PDFView pdfView;
     private PaintView paintView;
     boolean isDrawInit = false;
     private final static String KEY_CURRENT_PAGE = "current_page";
+    private final static String DRAW_ENABLED = "draw_Enabled";
+    Button drawButton;
+    public boolean drawEnabled;
 
 
     @Override
@@ -43,12 +47,21 @@ public class PresentationActivity extends AppCompatActivity implements  OnPageCh
         {
             mCurrentPage = -1;
         }
-        display();
+        //drawEnabled = savedInstanceState.getBoolean(DRAW_ENABLED);
 
+        setContentView(R.layout.activity_presentation);
+        drawButton = (Button) findViewById(R.id.initDraw);
+
+        drawButton.setOnClickListener(this);
+        initDraw();
+
+
+
+        display();
     }
 
     private void display() {
-        setContentView(R.layout.activity_presentation);
+
 
         pdfView = findViewById(R.id.pdfView);
         pdfPath = getIntent().getStringExtra("path");
@@ -88,20 +101,7 @@ public class PresentationActivity extends AppCompatActivity implements  OnPageCh
 
 
 
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState)
-    {
-        super.onRestoreInstanceState(savedInstanceState);
-        mCurrentPage = savedInstanceState.getInt(KEY_CURRENT_PAGE);
-    }
 
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState)
-    {
-        super.onSaveInstanceState(outState);
-        outState.putInt(KEY_CURRENT_PAGE, mCurrentPage);
-
-    }
 
     @Override
     public void onPageChanged(int page, int pageCount) {
@@ -109,13 +109,7 @@ public class PresentationActivity extends AppCompatActivity implements  OnPageCh
         setTitle(String.format("%s %s of %s", "Slide", page + 1, pageCount));
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-            initDraw();
-            isDrawInit = true;
 
-    }
 
 
 
@@ -128,6 +122,17 @@ public class PresentationActivity extends AppCompatActivity implements  OnPageCh
         getWindowManager().getDefaultDisplay().getRealMetrics(metrics);
         paintView.init(metrics);
 
+    }
+
+    @Override
+    public void onClick(View view) {
+        if (drawEnabled == false) {
+            drawButton.setText("Enabled");
+            drawEnabled = true;
+        } else if (drawEnabled == true) {
+            drawButton.setText("Disabled");
+            drawEnabled = false;
+        }
     }
 
 
@@ -143,4 +148,26 @@ public class PresentationActivity extends AppCompatActivity implements  OnPageCh
             Log.d("On Touch","X"+strokeWidth+"y"+path);
         }
     }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState)
+    {
+
+        super.onRestoreInstanceState(savedInstanceState);
+        mCurrentPage = savedInstanceState.getInt(KEY_CURRENT_PAGE);
+        drawEnabled = savedInstanceState.getBoolean(DRAW_ENABLED);
+        savedInstanceState.putBoolean(DRAW_ENABLED, drawEnabled);
+
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState)
+    {
+        super.onSaveInstanceState(outState);
+        outState.putInt(KEY_CURRENT_PAGE, mCurrentPage);
+        outState.putBoolean(DRAW_ENABLED, drawEnabled);
+
+
+    }
+
 }

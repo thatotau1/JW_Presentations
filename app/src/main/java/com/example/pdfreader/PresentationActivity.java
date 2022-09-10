@@ -145,8 +145,28 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
             this.colour = colour;
             this.strokeWidth = strokeWidth;
             this.path = path;
-            Log.d("On Touch","X"+strokeWidth+"y"+path);
+
         }
+        public int getColour() {
+            return colour;
+        }
+
+        /**
+         * Returns the width of the path to be drawn.
+         * @return int - the width of the path.
+         */
+        public int getWidth() {
+            return strokeWidth;
+        }
+
+        /**
+         * Returns the path object to be drawn.
+         * @return Path - the path object.
+         */
+        public Path getPath() {
+            return path;
+        }
+
     }
 
     @Override

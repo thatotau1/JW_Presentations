@@ -8,4 +8,26 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="transparent">#00ffffff</color>
+
+    <color name="colorRim">#3d3d3b</color>
+    <color name="colorCustom">?colorButtonNormal</color>
+    <color name="colorCustomFocused">#BDBDBD</color>
+    <color name="colorCustomDisabled">#CDCECECE</color>
+
+
+    <color name="colorGrey">#dddddd</color>
+    <color name="colorPink">#fec8d8</color>
+    <color name="colorGreen">#acdeaa</color>
+    <color name="colorBlueyGreen">#5fbdb0</color>
+    <color name="colorPurple">#baabda</color>
+    <color name="colorBlue">#b9ceeb</color>
+    <color name="colorGreenyBlue">#b5cfd8</color>
+    <color name="colorOrange">#ffc5a1</color>
+    <color name="colorPinkyPurple">#ce97b0</color>
+    <color name="colorRed">#e97a7a</color>
+    <color name="colorYellow">#ffffc2</color>
+    <color name="colorBlueyPurple">#5e70a8</color>
+    <color name="colorBlack">#3d3d3b</color>
+    <color name="colorMintyBlue">#a5dee5</color>
+    <color name="colorWhite">#ececec</color>
 </resources>

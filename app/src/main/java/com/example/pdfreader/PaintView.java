@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -34,7 +35,7 @@ public class PaintView extends View {
     private ArrayList<PresentationActivity.FingerPath> paths = new ArrayList<>() ;
     private Paint mBitmapPaint = new Paint(Paint.DITHER_FLAG);
     private ArrayList<PresentationActivity.FingerPath> undo = new ArrayList<>();
-    private ArrayList<PresentationActivity.FingerPath> redo;
+    private ArrayList<PresentationActivity.FingerPath> redo = new ArrayList<>();
 
 
     private Path mPath;
@@ -75,7 +76,16 @@ public class PaintView extends View {
 
     private void drawPaths(){
 
-        mCanvas.drawColor(Color.TRANSPARENT);
+
+    }
+
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+
+        this.mCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
         for(PresentationActivity.FingerPath fp : paths){
             mPaint.setColor(fp.colour);
@@ -84,18 +94,8 @@ public class PaintView extends View {
             mCanvas.drawPath(fp.path, mPaint);
         }
 
-        super.invalidate();
-    }
-
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-
         canvas.save();
-        canvas.drawColor(Color.TRANSPARENT);
-
-        if (undo.size() != 0)
+        if (paths.size() != 0)
         {
             // get the most recently drawn path
             PresentationActivity.FingerPath lastPath = undo.get(undo.size() - 1);
@@ -106,12 +106,7 @@ public class PaintView extends View {
             // draw the path
             this.mCanvas.drawPath(lastPath.getPath(), mPaint);
         }
-        for(PresentationActivity.FingerPath fp : paths){
-            mPaint.setColor(fp.colour);
-            mPaint.setStrokeWidth(fp.strokeWidth);
-            mPaint.setMaskFilter(null);
-            mCanvas.drawPath(fp.path, mPaint);
-        }
+
 
         canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
         canvas.restore();
@@ -198,32 +193,37 @@ public class PaintView extends View {
         
         
     }
-    public void undo ()
+    public void undo()
     {
         // if the user has performed an action
-        if (undo.size() > 0)
+        if (paths.size() > 0)
         {
             // add the drawn object to the redo list and re-draw
-            redo.add(undo.remove(undo.size() - 1));
-            drawPaths();
+            redo.add(paths.remove(paths.size() - 1));
+            Log.d("Undo Number", String.valueOf(paths.size()));
+            super.invalidate();
         }
     }
 
-    public void redo ()
+    public void redo()
     {
         // if the user has performed an action
         if (redo.size() > 0)
         {
             // add the drawn object to the undo list and re-draw
-            undo.add(redo.remove(redo.size() - 1));
-            drawPaths();
+            paths.add(redo.remove(redo.size() - 1));
+            Log.d("Number", String.valueOf(paths.size()));
+            super.invalidate();
         }
     }
 
     public void clear(){
-        undo.clear();
+
+        this.mCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         redo.clear();
-        invalidate();
+        paths.clear();
+        Log.d("Number", String.valueOf(paths.size()));
+        super.invalidate();
     }
 
     @Override

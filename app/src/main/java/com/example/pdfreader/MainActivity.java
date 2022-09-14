@@ -16,7 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity  {
     private int STORAGE_PERMISSION_CODE = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {

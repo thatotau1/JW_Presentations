@@ -14,6 +14,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 
 import com.github.barteksc.pdfviewer.PDFView;
 import com.github.barteksc.pdfviewer.listener.OnDrawListener;
@@ -50,11 +51,21 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
         //drawEnabled = savedInstanceState.getBoolean(DRAW_ENABLED);
 
         setContentView(R.layout.activity_presentation);
-        drawButton = (Button) findViewById(R.id.initDraw);
+        drawButton =(Button) findViewById(R.id.initDraw);
 
         drawButton.setOnClickListener(this);
         initDraw();
+        ImageButton clearButton = findViewById(R.id.clearButton);
+        clearButton.setOnClickListener(this);
 
+        ImageButton undoButton = findViewById(R.id.undoButton);
+        undoButton.setOnClickListener(this);
+
+        ImageButton redoButton = findViewById(R.id.redoButton);
+        redoButton.setOnClickListener(this);
+
+        ImageButton styleButton = findViewById(R.id.styleButton);
+        styleButton.setOnClickListener(this);
 
 
         display();
@@ -103,6 +114,8 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
 
 
 
+
+
     @Override
     public void onPageChanged(int page, int pageCount) {
         mCurrentPage = page;
@@ -126,12 +139,29 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
 
     @Override
     public void onClick(View view) {
-        if (drawEnabled == false) {
-            drawButton.setText("Enabled");
-            drawEnabled = true;
-        } else if (drawEnabled == true) {
-            drawButton.setText("Disabled");
-            drawEnabled = false;
+
+        int viewID = view.getId();
+        if (viewID == R.id.initDraw)
+        {
+            if (drawEnabled == false) {
+                drawButton.setText("Enabled");
+                drawEnabled = true;
+            } else if (drawEnabled == true) {
+                drawButton.setText("Disabled");
+                drawEnabled = false;
+            }
+        }else if (viewID == R.id.clearButton)
+        {
+            // clear the canvas
+            paintView.clear();
+        } else if (viewID == R.id.undoButton)
+        {
+            // undo the most recent drawing action
+            paintView.undo();
+        } else if (viewID == R.id.redoButton)
+        {
+            // redraw the most recently undone action
+            paintView.redo();
         }
     }
 

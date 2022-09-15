@@ -25,12 +25,13 @@ public class PaintView extends View {
     private static final float TOUCH_TOLERANCE = 3;
     private static final String EXTRA_EVENT_LIST = "event_list";
     private static final String EXTRA_STATE = "instance_state";
+    private int currentColor;
     private ArrayList<MotionEvent> eventList = new ArrayList<MotionEvent>(100);
     private ArrayList<MotionEvent> res_eventList = new ArrayList<MotionEvent>(100);
     private Paint mPaint;
     private Canvas mCanvas;
     private Bitmap mBitmap;
-    private int currentColor;
+    //private int currentColor;
 
     private ArrayList<PresentationActivity.FingerPath> paths = new ArrayList<>() ;
     private Paint mBitmapPaint = new Paint(Paint.DITHER_FLAG);
@@ -62,22 +63,31 @@ public class PaintView extends View {
         mPaint.setAlpha(0xff);
 
 
+
+    }
+
+    public int getColour() {
+        return currentColor;
+    }
+
+    public void setColour(int colour)
+    {
+        currentColor = colour;
     }
 
     public void init (DisplayMetrics metrics){
         int height = (int) (metrics.heightPixels);
         int width = metrics.widthPixels;
+        currentColor = ColoursChoiceManager.getDefaultColour(getContext());
+        mPaint.setColor(currentColor);
 
 
         mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mBitmap);
-        currentColor = Color.GREEN;
-    }
-
-    private void drawPaths(){
-
 
     }
+
+
 
 
     @Override

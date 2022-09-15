@@ -162,6 +162,17 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
         {
             // redraw the most recently undone action
             paintView.redo();
+        } else if (viewID == R.id.styleButton)
+        {
+            ColourPicker dialog = new ColourPicker(PresentationActivity.this, paintView.getColour());
+            dialog.setOnDialogOptionSelectedListener(new ColourPicker.ColourPickerSelectedListener() {
+                @Override
+                public void onColourPickerOptionSelected(int colour) {
+                    paintView.setColour(colour);
+                }
+            });
+            dialog.show();
+
         }
     }
 

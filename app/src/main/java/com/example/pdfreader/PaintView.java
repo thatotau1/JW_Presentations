@@ -78,7 +78,7 @@ public class PaintView extends View {
     public void init (DisplayMetrics metrics){
         int height = (int) (metrics.heightPixels);
         int width = metrics.widthPixels;
-        currentColor = ColoursChoiceManager.getDefaultColour(getContext());
+        currentColor = refActivity.currentColour;
         mPaint.setColor(currentColor);
 
 
@@ -210,6 +210,7 @@ public class PaintView extends View {
         {
             // add the drawn object to the redo list and re-draw
             redo.add(paths.remove(paths.size() - 1));
+            //eventList.remove( );
             Log.d("Undo Number", String.valueOf(paths.size()));
             super.invalidate();
         }
@@ -222,6 +223,7 @@ public class PaintView extends View {
         {
             // add the drawn object to the undo list and re-draw
             paths.add(redo.remove(redo.size() - 1));
+
             Log.d("Number", String.valueOf(paths.size()));
             super.invalidate();
         }
@@ -232,6 +234,7 @@ public class PaintView extends View {
         this.mCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         redo.clear();
         paths.clear();
+        eventList.clear();
         Log.d("Number", String.valueOf(paths.size()));
         super.invalidate();
     }

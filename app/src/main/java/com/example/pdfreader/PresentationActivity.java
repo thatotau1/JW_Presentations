@@ -25,16 +25,22 @@ import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 
 import java.io.File;
 
+import io.socket.client.Socket;
+
 public class PresentationActivity extends AppCompatActivity implements OnPageChangeListener, View.OnClickListener {
     String pdfPath = "";
     private int mCurrentPage = 0;
+    public int currentColour =0;
     PDFView pdfView;
     private PaintView paintView;
     boolean isDrawInit = false;
     private final static String KEY_CURRENT_PAGE = "current_page";
+    private final static String PAINT_COLOUR = "current_colour";
     private final static String DRAW_ENABLED = "draw_Enabled";
     Button drawButton;
     public boolean drawEnabled;
+    private Socket_Handler socketHandler;
+    private Socket mSocket;
 
 
     @Override
@@ -43,6 +49,7 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
         if (savedInstanceState != null)
         {
             mCurrentPage = savedInstanceState.getInt(KEY_CURRENT_PAGE);
+            currentColour= savedInstanceState.getInt(PAINT_COLOUR);
         }
         else
         {
@@ -66,6 +73,10 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
 
         ImageButton styleButton = findViewById(R.id.styleButton);
         styleButton.setOnClickListener(this);
+        socketHandler = Socket_Handler.getInstance();
+        socketHandler.setmSocket();
+        mSocket = socketHandler.getmSocket();
+        mSocket.connect();
 
 
         display();
@@ -150,6 +161,7 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
                 drawButton.setText("Disabled");
                 drawEnabled = false;
             }
+
         }else if (viewID == R.id.clearButton)
         {
             // clear the canvas
@@ -164,11 +176,13 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
             paintView.redo();
         } else if (viewID == R.id.styleButton)
         {
-            ColourPicker dialog = new ColourPicker(PresentationActivity.this, paintView.getColour());
+
+            ColourPicker dialog = new ColourPicker(PresentationActivity.this, currentColour);
             dialog.setOnDialogOptionSelectedListener(new ColourPicker.ColourPickerSelectedListener() {
                 @Override
                 public void onColourPickerOptionSelected(int colour) {
                     paintView.setColour(colour);
+                    currentColour =colour;
                 }
             });
             dialog.show();
@@ -216,6 +230,7 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
 
         super.onRestoreInstanceState(savedInstanceState);
         mCurrentPage = savedInstanceState.getInt(KEY_CURRENT_PAGE);
+        currentColour = savedInstanceState.getInt(PAINT_COLOUR);
         drawEnabled = savedInstanceState.getBoolean(DRAW_ENABLED);
         savedInstanceState.putBoolean(DRAW_ENABLED, drawEnabled);
 
@@ -226,6 +241,7 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
     {
         super.onSaveInstanceState(outState);
         outState.putInt(KEY_CURRENT_PAGE, mCurrentPage);
+        outState.putInt(PAINT_COLOUR, currentColour);
         outState.putBoolean(DRAW_ENABLED, drawEnabled);
 
 

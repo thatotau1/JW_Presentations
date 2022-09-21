@@ -3,6 +3,8 @@ package com.example.pdfreader;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -10,6 +12,8 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
@@ -23,7 +27,14 @@ import com.github.barteksc.pdfviewer.listener.OnPageChangeListener;
 import com.github.barteksc.pdfviewer.listener.OnRenderListener;
 import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import io.socket.client.Socket;
 
@@ -38,11 +49,21 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
     private final static String PAINT_COLOUR = "current_colour";
     private final static String DRAW_ENABLED = "draw_Enabled";
     Button drawButton;
+    Button presentButton;
+    Button stopButton;
     public boolean drawEnabled;
+    private boolean presentiting;
+    private boolean donePresenting;
     private Socket_Handler socketHandler;
     private Socket mSocket;
+    private View presentation;
+    private Screenshot screenshot;
+    private Bitmap bitmap;
+    private String encodedImg;
+    JSONObject dataSent;
 
 
+    @SuppressLint("WrongThread")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,8 +80,15 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
 
         setContentView(R.layout.activity_presentation);
         drawButton =(Button) findViewById(R.id.initDraw);
+        presentButton =(Button)findViewById(R.id.Stream);
+        stopButton =(Button)findViewById(R.id.Stop);
 
         drawButton.setOnClickListener(this);
+        presentButton.setOnClickListener(this);
+        stopButton.setOnClickListener(this);
+        presentButton.setText("Present");
+
+
         initDraw();
         ImageButton clearButton = findViewById(R.id.clearButton);
         clearButton.setOnClickListener(this);
@@ -75,8 +103,14 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
         styleButton.setOnClickListener(this);
         socketHandler = Socket_Handler.getInstance();
         socketHandler.setmSocket();
+        presentiting = false;
+        donePresenting =true;
+        stopButton.setEnabled(false);
+        socketHandler = Socket_Handler.getInstance();
+        socketHandler.setmSocket();
         mSocket = socketHandler.getmSocket();
-        mSocket.connect();
+        screenshot = new Screenshot();
+
 
 
         display();
@@ -147,12 +181,58 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
         paintView.init(metrics);
 
     }
+    class StreamThread extends Thread{
+        Socket mSocket;
+        Screenshot mScreenshot;
+        StreamThread(Socket mSocket, Screenshot mScreenshot){
+            this.mSocket =mSocket;
+            this.mScreenshot = mScreenshot;
+        }
+        @Override
+        public void run() {
+
+            while (presentiting == true) {
+                screenshot.takeScreenshot(paintView.refActivity, pdfView);
+                bitmap = screenshot.getmBitmap();
+                encodedImg = screenshot.encodeImage(bitmap);
+
+                dataSent = new JSONObject();
+                try {
+                    dataSent.put("imageData", encodedImg);
+                    mSocket.emit("image", dataSent);
+                    Log.d("I dk", String.valueOf(dataSent));
+                } catch (JSONException e) {
+
+                }
+            }
+        }
+    }
 
     @Override
     public void onClick(View view) {
 
         int viewID = view.getId();
-        if (viewID == R.id.initDraw)
+        if (viewID == R.id.Stream) {
+            presentButton.setText("Presenting");
+            stopButton.setEnabled(true);
+            presentButton.setEnabled(false);
+            presentiting = true;
+            mSocket.connect();
+            StreamThread thread = new StreamThread(mSocket, screenshot);
+            thread.start();
+
+
+        }
+        else if(viewID==R.id.Stop){
+            presentiting = false;
+            presentButton.setText("Present");
+            stopButton.setEnabled(false);
+            presentButton.setEnabled(true);
+
+        }
+
+
+        else if (viewID == R.id.initDraw)
         {
             if (drawEnabled == false) {
                 drawButton.setText("Enabled");
@@ -161,6 +241,29 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
                 drawButton.setText("Disabled");
                 drawEnabled = false;
             }
+/*
+            Date now = new Date();
+            android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm.ss", now);
+            try {
+                String mPath = Environment.getExternalStorageDirectory().toString() + "/" + now + ".jpg";
+                mPath = mPath.replaceAll(":",".") ;
+
+                File imageFile = new File(mPath);
+                FileOutputStream outputStream = new FileOutputStream(imageFile);
+                int quality = 100;
+                bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
+                outputStream.flush();
+                outputStream.close();
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_VIEW);
+                Uri uri = Uri.fromFile(imageFile);
+                intent.setDataAndType(uri, "image/*");
+                startActivity(intent);
+            }catch (Throwable e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+*/
 
         }else if (viewID == R.id.clearButton)
         {

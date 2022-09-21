@@ -3,13 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/Parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".PresentationActivity">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <Button
             android:id="@+id/initDraw"
@@ -32,61 +33,92 @@
         app:srcCompat="@drawable/ic_clear_all_black_24dp" android:background="@drawable/circle_button"/>
 
 
+        <!--app:layout_constraintStart_toEndOf="@+id/clearButton"-->
 
-    <ImageButton
-        android:id="@+id/undoButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintStart_toEndOf="@+id/clearButton"
-        app:layout_constraintTop_toTopOf="@+id/pdfView"
-        app:srcCompat="@drawable/ic_undo_black_24dp" android:background="@drawable/circle_button"/>
 
-    <ImageButton
-        android:id="@+id/redoButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintStart_toEndOf="@+id/undoButton"
-        app:layout_constraintTop_toTopOf="@+id/pdfView"
-        app:srcCompat="@drawable/ic_redo_black_24dp" android:background="@drawable/circle_button"/>
+        <ImageButton
+            android:id="@+id/undoButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/circle_button"
+            app:layout_constraintTop_toTopOf="@+id/pdfView"
+            app:srcCompat="@drawable/ic_undo_black_24dp" />
 
-    <ImageButton
-        android:id="@+id/styleButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintEnd_toEndOf="@+id/pdfView"
-        app:layout_constraintTop_toTopOf="@+id/pdfView"
-        app:srcCompat="@drawable/ic_color_lens_black_24dp" android:background="@drawable/circle_button"/>
+        <ImageButton
+            android:id="@+id/redoButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+
+            android:background="@drawable/circle_button"
+            app:layout_constraintTop_toTopOf="@+id/pdfView"
+            app:srcCompat="@drawable/ic_redo_black_24dp" />
+
+        <ImageButton
+            android:id="@+id/styleButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/circle_button"
+
+            app:srcCompat="@drawable/ic_color_lens_black_24dp" />
     </LinearLayout>
 
     <RelativeLayout
         android:id="@+id/relativeLayout"
         android:layout_width="match_parent"
-        android:layout_height="550dp">
+        android:layout_height="wrap_content">
 
-    <com.github.barteksc.pdfviewer.PDFView
+
+        <com.github.barteksc.pdfviewer.PDFView
             android:id="@+id/pdfView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="400dp"
 
             >
 
 
-        <com.example.pdfreader.PaintView
-            android:id="@+id/paintView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/transparent"
-            android:saveEnabled="false" />
+            <com.example.pdfreader.PaintView
+                android:id="@+id/paintView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/transparent"
+                android:saveEnabled="false" />
 
-    </com.github.barteksc.pdfviewer.PDFView>
+
+        </com.github.barteksc.pdfviewer.PDFView>
 
     </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/Presentation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+
+        <Button
+            android:id="@+id/Stream"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onPresentClick"
+
+            android:text="@string/Stop" />
+
+        <Button
+            android:id="@+id/Stop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onStop"
+
+            android:text="@string/Stop" />
+
+
+    </LinearLayout>
 
 
 </androidx.appcompat.widget.LinearLayoutCompat>

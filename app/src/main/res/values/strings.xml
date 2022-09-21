@@ -4,5 +4,7 @@
     <string name="colour_picker_header">Choose A Colour</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_select">Select</string>
+    <string name="Stream" />
+    <string name="Stop">Stop</string>
 
 </resources>

@@ -77,7 +77,7 @@
         <com.github.barteksc.pdfviewer.PDFView
             android:id="@+id/pdfView"
             android:layout_width="match_parent"
-            android:layout_height="400dp"
+            android:layout_height="200dp"
 
             >
 

@@ -13,6 +13,7 @@ import android.graphics.Path;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -48,11 +49,12 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
     private final static String KEY_CURRENT_PAGE = "current_page";
     private final static String PAINT_COLOUR = "current_colour";
     private final static String DRAW_ENABLED = "draw_Enabled";
+    private final static String PRESENTING = "presenting";
     Button drawButton;
     Button presentButton;
     Button stopButton;
-    public boolean drawEnabled;
-    private boolean presentiting;
+    public boolean drawEnabled=false;
+    private boolean presentiting=false;
     private boolean donePresenting;
     private Socket_Handler socketHandler;
     private Socket mSocket;
@@ -60,6 +62,8 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
     private Screenshot screenshot;
     private Bitmap bitmap;
     private String encodedImg;
+    public DisplayMetrics metrics;
+    public StreamThread thread ;;
     JSONObject dataSent;
 
 
@@ -71,12 +75,16 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
         {
             mCurrentPage = savedInstanceState.getInt(KEY_CURRENT_PAGE);
             currentColour= savedInstanceState.getInt(PAINT_COLOUR);
+            drawEnabled = savedInstanceState.getBoolean(DRAW_ENABLED);
+            presentiting = savedInstanceState.getBoolean(PRESENTING);
+
         }
         else
         {
             mCurrentPage = -1;
         }
-        //drawEnabled = savedInstanceState.getBoolean(DRAW_ENABLED);
+        metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
         setContentView(R.layout.activity_presentation);
         drawButton =(Button) findViewById(R.id.initDraw);
@@ -90,30 +98,39 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
 
 
         initDraw();
+        initUI();
+
         ImageButton clearButton = findViewById(R.id.clearButton);
         clearButton.setOnClickListener(this);
-
         ImageButton undoButton = findViewById(R.id.undoButton);
         undoButton.setOnClickListener(this);
-
         ImageButton redoButton = findViewById(R.id.redoButton);
         redoButton.setOnClickListener(this);
-
         ImageButton styleButton = findViewById(R.id.styleButton);
         styleButton.setOnClickListener(this);
-        socketHandler = Socket_Handler.getInstance();
-        socketHandler.setmSocket();
-        presentiting = false;
-        donePresenting =true;
-        stopButton.setEnabled(false);
-        socketHandler = Socket_Handler.getInstance();
-        socketHandler.setmSocket();
-        mSocket = socketHandler.getmSocket();
-        screenshot = new Screenshot();
 
 
 
         display();
+    }
+
+    private void initUI() {
+        if(presentiting==true){
+            presentButton.setEnabled(false);
+            presentButton.setText("Presenting");
+            stopButton.setEnabled(true);
+
+        }else if (presentiting == false){
+            presentButton.setEnabled(true);
+            presentButton.setText("Present");
+            stopButton.setEnabled(false);
+        }
+        if(drawEnabled==true){
+            drawButton.setText("Drawing");
+        }else{
+            drawButton.setText("Draw");
+        }
+
     }
 
     private void display() {
@@ -182,44 +199,61 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
 
     }
     class StreamThread extends Thread{
-        Socket mSocket;
-        Screenshot mScreenshot;
-        StreamThread(Socket mSocket, Screenshot mScreenshot){
-            this.mSocket =mSocket;
-            this.mScreenshot = mScreenshot;
+        StreamThread(){
+            socketHandler = Socket_Handler.getInstance();
+            socketHandler.setmSocket();
+            mSocket = socketHandler.getmSocket();
+        }
+
+        public void terminate() {
+            presentiting = false;
+            mSocket.disconnect();
         }
         @Override
         public void run() {
 
+
+            mSocket.connect();
             while (presentiting == true) {
+                screenshot = new Screenshot();
                 screenshot.takeScreenshot(paintView.refActivity, pdfView);
                 bitmap = screenshot.getmBitmap();
                 encodedImg = screenshot.encodeImage(bitmap);
-
                 dataSent = new JSONObject();
                 try {
                     dataSent.put("imageData", encodedImg);
                     mSocket.emit("image", dataSent);
                     Log.d("I dk", String.valueOf(dataSent));
-                } catch (JSONException e) {
+                    dataSent = null;
+                    encodedImg =null;
+                    bitmap = null;
+                    screenshot = null;
+                    Thread.sleep(50);
+                } catch (JSONException | InterruptedException e) {
 
                 }
             }
         }
+
+
     }
 
     @Override
     public void onClick(View view) {
 
         int viewID = view.getId();
+
+        thread = new StreamThread();
         if (viewID == R.id.Stream) {
+            presentiting = true;
+            thread = new StreamThread();
             presentButton.setText("Presenting");
             stopButton.setEnabled(true);
             presentButton.setEnabled(false);
-            presentiting = true;
-            mSocket.connect();
-            StreamThread thread = new StreamThread(mSocket, screenshot);
-            thread.start();
+            if(!thread.isAlive()){
+                thread.start();
+            }
+
 
 
         }
@@ -235,35 +269,12 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
         else if (viewID == R.id.initDraw)
         {
             if (drawEnabled == false) {
-                drawButton.setText("Enabled");
+                drawButton.setText("Drawing");
                 drawEnabled = true;
             } else if (drawEnabled == true) {
-                drawButton.setText("Disabled");
+                drawButton.setText("Draw");
                 drawEnabled = false;
             }
-/*
-            Date now = new Date();
-            android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm.ss", now);
-            try {
-                String mPath = Environment.getExternalStorageDirectory().toString() + "/" + now + ".jpg";
-                mPath = mPath.replaceAll(":",".") ;
-
-                File imageFile = new File(mPath);
-                FileOutputStream outputStream = new FileOutputStream(imageFile);
-                int quality = 100;
-                bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
-                outputStream.flush();
-                outputStream.close();
-                Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_VIEW);
-                Uri uri = Uri.fromFile(imageFile);
-                intent.setDataAndType(uri, "image/*");
-                startActivity(intent);
-            }catch (Throwable e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-*/
 
         }else if (viewID == R.id.clearButton)
         {
@@ -335,6 +346,8 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
         mCurrentPage = savedInstanceState.getInt(KEY_CURRENT_PAGE);
         currentColour = savedInstanceState.getInt(PAINT_COLOUR);
         drawEnabled = savedInstanceState.getBoolean(DRAW_ENABLED);
+        presentiting = savedInstanceState.getBoolean(PRESENTING);
+        savedInstanceState.putBoolean(PRESENTING, presentiting);
         savedInstanceState.putBoolean(DRAW_ENABLED, drawEnabled);
 
     }
@@ -346,6 +359,7 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
         outState.putInt(KEY_CURRENT_PAGE, mCurrentPage);
         outState.putInt(PAINT_COLOUR, currentColour);
         outState.putBoolean(DRAW_ENABLED, drawEnabled);
+        outState.putBoolean(PRESENTING, presentiting);
 
 
     }

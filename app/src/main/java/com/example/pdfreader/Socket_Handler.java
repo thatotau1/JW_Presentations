@@ -21,7 +21,7 @@ public class Socket_Handler {
     public void setmSocket() {
         {
             try {
-                mSocket = IO.socket("http://192.168.0.22:5000");
+                mSocket = IO.socket("http://192.168.0.21:5000");
             } catch (URISyntaxException e) {
             }
         }

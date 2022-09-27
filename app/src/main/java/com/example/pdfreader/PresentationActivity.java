@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -97,6 +98,8 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
         presentButton.setText("Present");
 
 
+
+
         initDraw();
         initUI();
 
@@ -116,11 +119,13 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
 
     private void initUI() {
         if(presentiting==true){
+            presentButton.performClick();
             presentButton.setEnabled(false);
             presentButton.setText("Presenting");
             stopButton.setEnabled(true);
 
         }else if (presentiting == false){
+            stopButton.performClick();
             presentButton.setEnabled(true);
             presentButton.setText("Present");
             stopButton.setEnabled(false);
@@ -173,23 +178,12 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
     }
 
 
-
-
-
-
-
     @Override
     public void onPageChanged(int page, int pageCount) {
         mCurrentPage = page;
         setTitle(String.format("%s %s of %s", "Slide", page + 1, pageCount));
     }
 
-
-
-
-
-    public void onInitDrawClick(View view) {
-    }
 
     private void initDraw(){
         paintView = findViewById(R.id.paintView);
@@ -198,22 +192,27 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
         paintView.init(metrics);
 
     }
+
+
     class StreamThread extends Thread{
         StreamThread(){
+
             socketHandler = Socket_Handler.getInstance();
             socketHandler.setmSocket();
             mSocket = socketHandler.getmSocket();
+            mSocket.connect();
         }
 
         public void terminate() {
-            presentiting = false;
             mSocket.disconnect();
+            presentiting = false;
+
         }
         @Override
         public void run() {
 
 
-            mSocket.connect();
+
             while (presentiting == true) {
                 screenshot = new Screenshot();
                 screenshot.takeScreenshot(paintView.refActivity, pdfView);
@@ -221,14 +220,16 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
                 encodedImg = screenshot.encodeImage(bitmap);
                 dataSent = new JSONObject();
                 try {
-                    dataSent.put("imageData", encodedImg);
-                    mSocket.emit("image", dataSent);
-                    Log.d("I dk", String.valueOf(dataSent));
-                    dataSent = null;
-                    encodedImg =null;
-                    bitmap = null;
+                    if(encodedImg != null) {
+                        dataSent.put("imageData", encodedImg);
+                        mSocket.emit("image", dataSent);
+                    }
                     screenshot = null;
-                    Thread.sleep(50);
+                    bitmap = null;
+                    encodedImg = null;
+
+                    //Log.d("I dk", String.valueOf(dataSent));
+                    Thread.sleep(100);
                 } catch (JSONException | InterruptedException e) {
 
                 }
@@ -238,23 +239,25 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
 
     }
 
+
+
     @Override
     public void onClick(View view) {
 
         int viewID = view.getId();
 
-        thread = new StreamThread();
+
         if (viewID == R.id.Stream) {
-            presentiting = true;
+
             thread = new StreamThread();
+            presentiting = true;
             presentButton.setText("Presenting");
             stopButton.setEnabled(true);
             presentButton.setEnabled(false);
+
             if(!thread.isAlive()){
                 thread.start();
             }
-
-
 
         }
         else if(viewID==R.id.Stop){
@@ -262,7 +265,9 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
             presentButton.setText("Present");
             stopButton.setEnabled(false);
             presentButton.setEnabled(true);
-
+            if (thread !=null) {
+                thread.terminate();
+            }
         }
 
 

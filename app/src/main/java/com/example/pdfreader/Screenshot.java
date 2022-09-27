@@ -17,7 +17,7 @@ public class Screenshot {
     public void takeScreenshot(Activity refActivity, View v) {
 
         try {
-            v = refActivity.getWindow().getDecorView();
+            v = refActivity.getWindow().getDecorView().getRootView();
             v.setDrawingCacheEnabled(true);
             v.buildDrawingCache(true);
             mBitmap =  Bitmap.createBitmap(v.getDrawingCache());
@@ -35,10 +35,15 @@ public class Screenshot {
 
         public String encodeImage(Bitmap bitmap){
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] b = baos.toByteArray();
-            String encImage = Base64.encodeToString(b, Base64.DEFAULT);
-            return encImage;
+            if (bitmap != null) {
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                byte[] b = baos.toByteArray();
+                String encImage = Base64.encodeToString(b, Base64.DEFAULT);
+                return encImage;
+            } else {
+                return null;
+            }
+
         }
 
     }

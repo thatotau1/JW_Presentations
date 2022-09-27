@@ -6,7 +6,7 @@ import io.socket.client.IO;
 import io.socket.client.Socket;
 
 public class Socket_Handler {
-    private Socket mSocket;
+    private Socket mSocket ;
     private static Socket_Handler instance;
     private Socket_Handler(){
 
@@ -21,7 +21,12 @@ public class Socket_Handler {
     public void setmSocket() {
         {
             try {
-                mSocket = IO.socket("http://192.168.0.21:5000");
+                if(mSocket==null) {
+                    mSocket = IO.socket("http://192.168.0.22:5000");
+                }else{
+                    mSocket.close();
+                    mSocket = IO.socket("http://192.168.0.22:5000");
+                }
             } catch (URISyntaxException e) {
             }
         }

@@ -22,19 +22,19 @@
             android:layout_height="wrap_content"
             android:onClick="onInitDrawClick"
 
-            android:text="@string/Draw"/>
+        android:text="@string/Draw"/>
 
 
 
-        <ImageButton
-            android:id="@+id/clearButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintStart_toStartOf="@+id/pdfView"
-            app:layout_constraintTop_toTopOf="@+id/pdfView"
-            app:srcCompat="@drawable/ic_clear_all_black_24dp" android:background="@drawable/circle_button"/>
+    <ImageButton
+        android:id="@+id/clearButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="@+id/pdfView"
+        app:layout_constraintTop_toTopOf="@+id/pdfView"
+        app:srcCompat="@drawable/ic_clear_all_black_24dp" android:background="@drawable/circle_button"/>
 
 
         <!--app:layout_constraintStart_toEndOf="@+id/clearButton"-->

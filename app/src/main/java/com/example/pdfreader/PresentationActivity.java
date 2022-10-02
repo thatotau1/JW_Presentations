@@ -46,7 +46,7 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
     public int currentColour =0;
     PDFView pdfView;
     private PaintView paintView;
-    boolean isDrawInit = false;
+
     private final static String KEY_CURRENT_PAGE = "current_page";
     private final static String PAINT_COLOUR = "current_colour";
     private final static String DRAW_ENABLED = "draw_Enabled";
@@ -56,10 +56,10 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
     Button stopButton;
     public boolean drawEnabled=false;
     private boolean presentiting=false;
-    private boolean donePresenting;
+
     private Socket_Handler socketHandler;
     private Socket mSocket;
-    private View presentation;
+
     private Screenshot screenshot;
     private Bitmap bitmap;
     private String encodedImg;
@@ -98,8 +98,6 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
         presentButton.setText("Present");
 
 
-
-
         initDraw();
         initUI();
 
@@ -111,9 +109,6 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
         redoButton.setOnClickListener(this);
         ImageButton styleButton = findViewById(R.id.styleButton);
         styleButton.setOnClickListener(this);
-
-
-
         display();
     }
 
@@ -139,7 +134,6 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
     }
 
     private void display() {
-
 
         pdfView = findViewById(R.id.pdfView);
         pdfPath = getIntent().getStringExtra("path");
@@ -196,7 +190,6 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
 
     class StreamThread extends Thread{
         StreamThread(){
-
             socketHandler = Socket_Handler.getInstance();
             socketHandler.setmSocket();
             mSocket = socketHandler.getmSocket();
@@ -208,31 +201,36 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
             presentiting = false;
 
         }
+
         @Override
         public void run() {
-
-
-
+            Log.d("Thread_Start", "Thread has started");
             while (presentiting == true) {
+                if (screenshot !=null){
+
+                }
                 screenshot = new Screenshot();
                 screenshot.takeScreenshot(paintView.refActivity, pdfView);
                 bitmap = screenshot.getmBitmap();
                 encodedImg = screenshot.encodeImage(bitmap);
+                screenshot.clear();
+
                 dataSent = new JSONObject();
                 try {
                     if(encodedImg != null) {
                         dataSent.put("imageData", encodedImg);
                         mSocket.emit("image", dataSent);
-                    }
-                    screenshot = null;
-                    bitmap = null;
-                    encodedImg = null;
 
-                    //Log.d("I dk", String.valueOf(dataSent));
+                        Log.d("image", String.valueOf(dataSent));
+                    }
                     Thread.sleep(100);
+                    dataSent.remove("imageData");
                 } catch (JSONException | InterruptedException e) {
 
                 }
+                //screenshot = null;
+                bitmap = null;
+
             }
         }
 
@@ -369,4 +367,20 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(mSocket!=null) {
+            mSocket.disconnect();
+        }
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if(thread != null){
+            thread.terminate();
+        }
+    }
 }

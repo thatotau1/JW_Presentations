@@ -22,10 +22,10 @@ public class Socket_Handler {
         {
             try {
                 if(mSocket==null) {
-                    mSocket = IO.socket("http://192.168.0.22:5000");
+                    mSocket = IO.socket("http://192.168.0.23:5000");
                 }else{
                     mSocket.close();
-                    mSocket = IO.socket("http://192.168.0.22:5000");
+                    mSocket = IO.socket("http://192.168.0.23:5000");
                 }
             } catch (URISyntaxException e) {
             }

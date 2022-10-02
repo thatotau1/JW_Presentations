@@ -3,6 +3,9 @@ package com.example.pdfreader;
 import android.app.Activity;
 import android.graphics.Bitmap;
 
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 
 
@@ -13,16 +16,26 @@ import io.socket.engineio.parser.Base64;
 
 public class Screenshot {
     private static Bitmap mBitmap;
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    private static String encImage = "";
 
     public void takeScreenshot(Activity refActivity, View v) {
 
         try {
-            v = refActivity.getWindow().getDecorView().getRootView();
-            v.setDrawingCacheEnabled(true);
-            v.buildDrawingCache(true);
-            mBitmap =  Bitmap.createBitmap(v.getDrawingCache());
-            v.setDrawingCacheEnabled(false);
-            //v.destroyDrawingCache();
+            View v2 = refActivity.getWindow().getDecorView();
+            v2.setDrawingCacheEnabled(true);
+            v2.buildDrawingCache(true);
+            mBitmap = Bitmap.createBitmap(v2.getDrawingCache());
+            v2.setDrawingCacheEnabled(false);
+            v2.destroyDrawingCache();
+            //Canvas canvas = new Canvas(mBitmap);
+            //Drawable bgDrawable = v2.getBackground();
+            //if (bgDrawable != null)
+              //  bgDrawable.draw(canvas);
+            //else
+              //  canvas.drawColor(Color.WHITE);
+            //v2.draw(canvas);
+            //v2.draw(canvas);
 
         }catch (Throwable e){
             e.printStackTrace();
@@ -34,16 +47,22 @@ public class Screenshot {
         }
 
         public String encodeImage(Bitmap bitmap){
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
             if (bitmap != null) {
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
                 byte[] b = baos.toByteArray();
-                String encImage = Base64.encodeToString(b, Base64.DEFAULT);
+                encImage = Base64.encodeToString(b, Base64.DEFAULT);
                 return encImage;
             } else {
                 return null;
             }
 
+        }
+        public void clear(){
+        if(mBitmap!=null){
+                mBitmap = null;
+            }
+        encImage="";
         }
 
     }

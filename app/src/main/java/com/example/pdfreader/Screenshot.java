@@ -16,7 +16,7 @@ import io.socket.engineio.parser.Base64;
 
 public class Screenshot {
     private static Bitmap mBitmap;
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
     private static String encImage = "";
 
     public void takeScreenshot(Activity refActivity, View v) {
@@ -49,9 +49,9 @@ public class Screenshot {
         public String encodeImage(Bitmap bitmap){
 
             if (bitmap != null) {
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                byte[] b = baos.toByteArray();
-                encImage = Base64.encodeToString(b, Base64.DEFAULT);
+                //bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                //byte[] b = baos.toByteArray();
+                //encImage = Base64.encodeToString(b, Base64.DEFAULT);
                 return encImage;
             } else {
                 return null;

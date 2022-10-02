@@ -1,23 +1,37 @@
 package com.example.pdfreader;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ImageFormat;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PixelFormat;
+import android.graphics.Point;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.VirtualDisplay;
+import android.media.Image;
+import android.media.ImageReader;
+import android.media.projection.MediaProjection;
+import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -32,13 +46,18 @@ import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import io.socket.client.Socket;
+import io.socket.engineio.parser.Base64;
 
 public class PresentationActivity extends AppCompatActivity implements OnPageChangeListener, View.OnClickListener {
     String pdfPath = "";
@@ -46,6 +65,17 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
     public int currentColour =0;
     PDFView pdfView;
     private PaintView paintView;
+
+    private static final String TAG = PresentationActivity.class.getName();
+    private  static final int REQUEST_CODE = 100;
+
+    private MediaProjectionManager mProjectionManager;
+    private MediaProjection mProjection;
+    private ImageReader mImageReader;
+    private Handler mHandler = new Handler(Looper.getMainLooper());
+    private int imagesProduced;
+    private long startTimeInMills;
+
 
     private final static String KEY_CURRENT_PAGE = "current_page";
     private final static String PAINT_COLOUR = "current_colour";
@@ -64,7 +94,8 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
     private Bitmap bitmap;
     private String encodedImg;
     public DisplayMetrics metrics;
-    public StreamThread thread ;;
+
+
     JSONObject dataSent;
 
 
@@ -86,6 +117,8 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
         }
         metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+        mProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
 
         setContentView(R.layout.activity_presentation);
         drawButton =(Button) findViewById(R.id.initDraw);
@@ -110,6 +143,130 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
         ImageButton styleButton = findViewById(R.id.styleButton);
         styleButton.setOnClickListener(this);
         display();
+
+    }
+
+    @SuppressLint("WrongConstant")
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                // for statistics -- init
+                imagesProduced = 0;
+                startTimeInMills = System.currentTimeMillis();
+
+                mProjection = mProjectionManager.getMediaProjection(resultCode, data);
+
+                if (mProjection != null) {
+                    final DisplayMetrics metrics = getResources().getDisplayMetrics();
+                    final int density = metrics.densityDpi;
+                    final int flags = DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY | DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
+                    final Display display = getWindowManager().getDefaultDisplay();
+                    final Point size = new Point();
+                    display.getSize(size);
+                    final int width = size.x;
+                    final int height = size.y;
+
+
+                    mImageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 5);
+                    mProjection.createVirtualDisplay("screencap", width, height, density, flags, mImageReader.getSurface(), new VirtualDisplayCallback(), mHandler);
+                    mImageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
+
+                        @Override
+                        public void onImageAvailable(ImageReader reader) {
+                            Image image = null;
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                            FileOutputStream fos = null;
+                            Bitmap bitmap = null;
+
+
+                            try {
+                                image = mImageReader.acquireLatestImage();
+                                if (image != null) {
+                                    final Image.Plane[] planes = image.getPlanes();
+                                    if (planes[0].getBuffer() == null) {
+                                        return;
+                                    }
+                                    int width = image.getWidth();
+                                    int height = image.getHeight();
+                                    int pixelStride = planes[0].getPixelStride();
+                                    int rowStride = planes[0].getRowStride();
+                                    int rowPadding = rowStride - pixelStride * width;
+                                    byte[] newData = new byte[width * height * 4];
+
+                                    int offset = 0;
+
+
+                                    // create bitmap
+                                    String encImage;
+
+                                    bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                                    ByteBuffer buffer = planes[0].getBuffer();
+                                    for (int i = 0; i < height; ++i) {
+                                        for (int j = 0; j < width; ++j) {
+                                            int pixel = 0;
+                                            pixel |= (buffer.get(offset) & 0xff) << 16;     // R
+                                            pixel |= (buffer.get(offset + 1) & 0xff) << 8;  // G
+                                            pixel |= (buffer.get(offset + 2) & 0xff);       // B
+                                            pixel |= (buffer.get(offset + 3) & 0xff) << 24; // A
+                                            bitmap.setPixel(j, i, pixel);
+                                            offset += pixelStride;
+                                        }
+                                        offset += rowPadding;
+                                    }
+
+                                    // write bitmap to a file
+                                    //fos = new FileOutputStream(getFilesDir() + "/myscreen.png");
+
+                                    /**
+                                     uncomment this if you want either PNG or JPEG output
+                                     */
+                                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                                    byte[] b = baos.toByteArray();
+                                    encImage = Base64.encodeToString(b, Base64.DEFAULT);
+                                    dataSent = new JSONObject();
+
+                                    dataSent.put("imageData", encImage);
+                                    mSocket.emit("image", dataSent);
+
+                                    //bitmap.compress(CompressFormat.PNG, 100, fos);
+
+                                    // for statistics
+                                    imagesProduced++;
+                                    final long now = System.currentTimeMillis();
+                                    final long sampleTime = now - startTimeInMills;
+                                    Log.e(TAG, "produced images at rate: " + (imagesProduced / (sampleTime / 1000.0f)) + " per sec");
+                                }
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            } finally {
+                                if (baos != null) {
+                                    try {
+                                        baos.close();
+                                    } catch (IOException ioe) {
+                                        ioe.printStackTrace();
+                                    }
+                                }
+
+                                if (bitmap != null)
+                                    bitmap.recycle();
+
+                                if (image != null)
+                                    image.close();
+
+                            }
+                        }
+
+                    }, mHandler);
+                }
+
+            }
+
+            super.onActivityResult(requestCode, resultCode, data);
+        } else {
+            Log.d(TAG, "Persmission denied");
+        }
     }
 
     private void initUI() {
@@ -188,56 +345,36 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
     }
 
 
-    class StreamThread extends Thread{
-        StreamThread(){
-            socketHandler = Socket_Handler.getInstance();
-            socketHandler.setmSocket();
-            mSocket = socketHandler.getmSocket();
-            mSocket.connect();
-        }
 
-        public void terminate() {
-            mSocket.disconnect();
-            presentiting = false;
 
+    private class VirtualDisplayCallback extends VirtualDisplay.Callback {
+        @Override
+        public void onPaused() {
+            super.onPaused();
+            Log.e(TAG, "VirtualDisplayCallback: onPaused");
         }
 
         @Override
-        public void run() {
-            Log.d("Thread_Start", "Thread has started");
-            while (presentiting == true) {
-                if (screenshot !=null){
-
-                }
-                screenshot = new Screenshot();
-                screenshot.takeScreenshot(paintView.refActivity, pdfView);
-                bitmap = screenshot.getmBitmap();
-                encodedImg = screenshot.encodeImage(bitmap);
-                screenshot.clear();
-
-                dataSent = new JSONObject();
-                try {
-                    if(encodedImg != null) {
-                        dataSent.put("imageData", encodedImg);
-                        mSocket.emit("image", dataSent);
-
-                        Log.d("image", String.valueOf(dataSent));
-                    }
-                    Thread.sleep(100);
-                    dataSent.remove("imageData");
-                } catch (JSONException | InterruptedException e) {
-
-                }
-                //screenshot = null;
-                bitmap = null;
-
-            }
+        public void onResumed() {
+            super.onResumed();
+            Log.e(TAG, "VirtualDisplayCallback: onResumed");
         }
 
+        @Override
+        public void onStopped() {
+            super.onStopped();
+            Log.e(TAG, "VirtualDisplayCallback: onStopped");
+        }
 
     }
-
-
+    final Thread present = new Thread(new Runnable(){
+        @Override
+        public void run() {
+            Looper.prepare();
+            mHandler = new Handler();
+            Looper.loop();
+        }
+    });
 
     @Override
     public void onClick(View view) {
@@ -247,15 +384,25 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
 
         if (viewID == R.id.Stream) {
 
-            thread = new StreamThread();
+            //thread = new StreamThread();
             presentiting = true;
+            socketHandler = Socket_Handler.getInstance();
+            socketHandler.setmSocket();
+            mSocket = socketHandler.getmSocket();
+            mSocket.connect();
             presentButton.setText("Presenting");
             stopButton.setEnabled(true);
             presentButton.setEnabled(false);
+           if(!present.isAlive())
+           {
+               present.start();
+               if(mProjection==null) {
+                   startProjection();
+               }
 
-            if(!thread.isAlive()){
-                thread.start();
-            }
+           }
+
+
 
         }
         else if(viewID==R.id.Stop){
@@ -263,9 +410,8 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
             presentButton.setText("Present");
             stopButton.setEnabled(false);
             presentButton.setEnabled(true);
-            if (thread !=null) {
-                thread.terminate();
-            }
+            stopProjection();
+
         }
 
 
@@ -305,6 +451,126 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
             dialog.show();
 
         }
+    }
+
+    private void stopProjection() {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if(mProjection !=null) {
+                    mProjection.stop();
+                }
+            }
+        });
+    }
+
+    private void startProjection() {
+        if(mProjection == null) {
+            startActivityForResult(mProjectionManager.createScreenCaptureIntent(), REQUEST_CODE);
+        }else{
+            final DisplayMetrics metrics = getResources().getDisplayMetrics();
+            final int density = metrics.densityDpi;
+            final int flags = DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY | DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
+            final Display display = getWindowManager().getDefaultDisplay();
+            final Point size = new Point();
+            display.getSize(size);
+            final int width = size.x;
+            final int height = size.y;
+
+
+            mImageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 5);
+            mProjection.createVirtualDisplay("screencap", width, height, density, flags, mImageReader.getSurface(), new VirtualDisplayCallback(), mHandler);
+            mImageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
+
+                @Override
+                public void onImageAvailable(ImageReader reader) {
+                    Image image = null;
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    FileOutputStream fos = null;
+                    Bitmap bitmap = null;
+
+
+                    try {
+                        image = mImageReader.acquireLatestImage();
+                        if (image != null) {
+                            final Image.Plane[] planes = image.getPlanes();
+                            if (planes[0].getBuffer() == null) {
+                                return;
+                            }
+                            int width = image.getWidth();
+                            int height = image.getHeight();
+                            int pixelStride = planes[0].getPixelStride();
+                            int rowStride = planes[0].getRowStride();
+                            int rowPadding = rowStride - pixelStride * width;
+                            byte[] newData = new byte[width * height * 4];
+
+                            int offset = 0;
+
+
+                            // create bitmap
+                            String encImage;
+
+                            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                            ByteBuffer buffer = planes[0].getBuffer();
+                            for (int i = 0; i < height; ++i) {
+                                for (int j = 0; j < width; ++j) {
+                                    int pixel = 0;
+                                    pixel |= (buffer.get(offset) & 0xff) << 16;     // R
+                                    pixel |= (buffer.get(offset + 1) & 0xff) << 8;  // G
+                                    pixel |= (buffer.get(offset + 2) & 0xff);       // B
+                                    pixel |= (buffer.get(offset + 3) & 0xff) << 24; // A
+                                    bitmap.setPixel(j, i, pixel);
+                                    offset += pixelStride;
+                                }
+                                offset += rowPadding;
+                            }
+
+                            // write bitmap to a file
+                            //fos = new FileOutputStream(getFilesDir() + "/myscreen.png");
+
+                            /**
+                             uncomment this if you want either PNG or JPEG output
+                             */
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                            byte[] b = baos.toByteArray();
+                            encImage = Base64.encodeToString(b, Base64.DEFAULT);
+                            dataSent = new JSONObject();
+
+                            dataSent.put("imageData", encImage);
+                            mSocket.emit("image", dataSent);
+
+                            //bitmap.compress(CompressFormat.PNG, 100, fos);
+
+                            // for statistics
+                            imagesProduced++;
+                            final long now = System.currentTimeMillis();
+                            final long sampleTime = now - startTimeInMills;
+                            Log.e(TAG, "produced images at rate: " + (imagesProduced / (sampleTime / 1000.0f)) + " per sec");
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        if (baos != null) {
+                            try {
+                                baos.close();
+                            } catch (IOException ioe) {
+                                ioe.printStackTrace();
+                            }
+                        }
+
+                        if (bitmap != null)
+                            bitmap.recycle();
+
+                        if (image != null)
+                            image.close();
+
+                    }
+                }
+
+            }, mHandler);
+        }
+
     }
 
 
@@ -379,8 +645,7 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        if(thread != null){
-            thread.terminate();
+
         }
-    }
+
 }

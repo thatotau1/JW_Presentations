@@ -8,69 +8,64 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-
     tools:context=".PresentationActivity">
 
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/drawing_buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+
         android:layout_weight="5">
 
-        <Button
+
+        <ImageButton
             android:id="@+id/initDraw"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onInitDrawClick"
-
-            android:text="@string/Draw"/>
-
-
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/circle_button"
+            app:srcCompat="@drawable/ic_pen_24dp" />
 
         <ImageButton
             android:id="@+id/clearButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintStart_toStartOf="@+id/pdfView"
-            app:layout_constraintTop_toTopOf="@+id/pdfView"
-            app:srcCompat="@drawable/ic_clear_all_black_24dp" android:background="@drawable/circle_button"/>
+            android:layout_toStartOf="@id/undoButton"
+            app:srcCompat="@drawable/ic_clear_all_black_24dp"
+            android:background="@drawable/circle_button"/>
 
 
-        <!--app:layout_constraintStart_toEndOf="@+id/clearButton"-->
+
 
 
         <ImageButton
             android:id="@+id/undoButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
             android:background="@drawable/circle_button"
-            app:layout_constraintTop_toTopOf="@+id/pdfView"
+            android:layout_centerHorizontal="true"
             app:srcCompat="@drawable/ic_undo_black_24dp" />
 
         <ImageButton
             android:id="@+id/redoButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-
             android:background="@drawable/circle_button"
-            app:layout_constraintTop_toTopOf="@+id/pdfView"
+            android:layout_toEndOf="@id/undoButton"
+            android:layout_alignParentTop="true"
             app:srcCompat="@drawable/ic_redo_black_24dp" />
 
         <ImageButton
             android:id="@+id/styleButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
             android:background="@drawable/circle_button"
-
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
             app:srcCompat="@drawable/ic_color_lens_black_24dp" />
-    </LinearLayout>
+
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/relativeLayout"
@@ -100,29 +95,32 @@
 
     <LinearLayout
         android:id="@+id/Presentation"
-        android:layout_weight="5"
+        android:layout_weight="10"
+        android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         >
 
 
-
-
-        <Button
+        <ImageButton
             android:id="@+id/Stream"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onPresentClick"
+            android:layout_marginStart="8dp"
 
-            android:text="@string/Stop" />
+            android:background="@drawable/circle_button"
+            app:layout_constraintTop_toBottomOf="@+id/pdfView"
+            app:srcCompat="@drawable/ic_play_48dp" />
 
-        <Button
+        <ImageButton
             android:id="@+id/Stop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onStop"
-
-            android:text="@string/Stop" />
+            android:layout_marginStart="8dp"
+            android:background="@drawable/circle_button"
+            android:gravity="center"
+            app:layout_constraintTop_toBottomOf="@+id/pdfView"
+            app:srcCompat="@drawable/ic_stop_48dp" />
 
 
     </LinearLayout>

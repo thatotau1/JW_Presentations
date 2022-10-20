@@ -9,6 +9,14 @@
         <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/circle_button_focus.xml" value="0.2055" />
         <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/circle_button_no_focus.xml" value="0.2055" />
         <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/colour_circle.xml" value="0.2775" />
+        <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/home_info_circle.xml" value="0.191" />
+        <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/home_page_circle.xml" value="0.211" />
+        <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/home_pdf_circle.xml" value="0.13" />
+        <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/ic_background.xml" value="0.1" />
+        <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/ic_baseline_info_24.xml" value="0.1" />
+        <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/ic_baseline_info_24_clicked.xml" value="0.122" />
+        <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/ic_baseline_present_to_all_24.xml" value="0.191" />
+        <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/ic_baseline_present_to_all_24_clicked.xml" value="0.122" />
         <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/ic_clear_all_black_24dp.xml" value="0.2055" />
         <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/ic_color_lens_black_24dp.xml" value="0.192" />
         <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/ic_done_black_24dp.xml" value="0.1" />
@@ -20,15 +28,17 @@
         <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/ic_redo_black_24dp.xml" value="0.192" />
         <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/ic_stop_48dp.xml" value="0.2375" />
         <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/ic_undo_black_24dp.xml" value="0.192" />
+        <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/info_button.xml" value="0.122" />
+        <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/present_button.xml" value="0.2195" />
         <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/rounded_button.xml" value="0.2765" />
         <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/rounded_button_focus.xml" value="0.14" />
         <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/drawable/rounded_button_no_focus.xml" value="0.2765" />
         <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/layout-land/activity_presentation.xml" value="0.19135802469135801" />
         <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/layout/activity_main.xml" value="0.3509963768115942" />
-        <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/layout/activity_main2.xml" value="0.203125" />
-        <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/layout/activity_presentation.xml" value="0.2" />
+        <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/layout/activity_main2.xml" value="0.1" />
+        <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/layout/activity_presentation.xml" value="0.1" />
         <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/layout/colour_picker.xml" value="0.271875" />
-        <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/layout/pdf_holder.xml" value="0.33" />
+        <entry key="..\:/Users/tauth/AndroidStudioProjects/PDFReader/app/src/main/res/layout/pdf_holder.xml" value="0.1" />
       </map>
     </option>
   </component>

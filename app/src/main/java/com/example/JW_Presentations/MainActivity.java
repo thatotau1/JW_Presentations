@@ -1,10 +1,9 @@
-package com.example.pdfreader;
+package com.example.JW_Presentations;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.PackageManagerCompat;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -13,7 +12,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
+import android.view.Window;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity  {
@@ -21,15 +21,17 @@ public class MainActivity extends AppCompatActivity  {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //requstWindowFeature(Window.FEATURE_NO_TITLE);
+        getSupportActionBar().hide();
         setContentView(R.layout.activity_main2);
-        Button buttonRequest =findViewById(R.id.button);
-        buttonRequest.setOnClickListener(new View.OnClickListener() {
-            @Override
+        ImageButton btnStartPresent =findViewById(R.id.home_present);
+        btnStartPresent.setOnClickListener(new View.OnClickListener() {
+           @Override
             public void onClick(View view) {
                 if ((ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)== PackageManager.PERMISSION_GRANTED)&&(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)== PackageManager.PERMISSION_GRANTED)){
 
-                    Intent i = new Intent(getApplicationContext(),PDVView.class);
-                    startActivity(i);
+                 Intent i = new Intent(getApplicationContext(),PDVView.class);
+                 startActivity(i);
                 }else{
                     requestStoragePermission();
                 }

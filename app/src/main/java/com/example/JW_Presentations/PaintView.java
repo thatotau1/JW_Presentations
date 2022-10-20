@@ -1,4 +1,4 @@
-package com.example.pdfreader;
+package com.example.JW_Presentations;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -15,8 +15,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 ;
-
-import com.github.barteksc.pdfviewer.PDFView;
 
 import java.util.ArrayList;
 

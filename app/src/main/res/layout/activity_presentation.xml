@@ -81,7 +81,7 @@
             >
 
 
-            <com.example.pdfreader.PaintView
+            <com.example.JW_Presentations.PaintView
                 android:id="@+id/paintView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

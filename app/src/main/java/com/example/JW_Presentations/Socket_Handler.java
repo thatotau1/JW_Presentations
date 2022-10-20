@@ -1,4 +1,4 @@
-package com.example.pdfreader;
+package com.example.JW_Presentations;
 
 import java.net.URISyntaxException;
 

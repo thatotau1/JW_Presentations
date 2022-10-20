@@ -1,4 +1,4 @@
-package com.example.pdfreader;
+package com.example.JW_Presentations;
 
 import android.app.Activity;
 import android.app.Dialog;

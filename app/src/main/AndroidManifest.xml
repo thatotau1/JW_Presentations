@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.pdfreader">
+    package="com.example.JW_Presentations">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -22,11 +22,11 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".PresentationActivity"
+            android:name="com.example.JW_Presentations.PresentationActivity"
 
             android:exported="true" />
         <activity
-            android:name=".MainActivity"
+            android:name="com.example.JW_Presentations.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -35,7 +35,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".PDVView"
+            android:name="com.example.JW_Presentations.PDVView"
 
             android:exported="false"></activity>
     </application>

@@ -1,17 +1,9 @@
-package com.example.pdfreader;
+package com.example.JW_Presentations;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
 
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.view.View;
-
-
-import java.io.ByteArrayOutputStream;
-
-import io.socket.engineio.parser.Base64;
 
 
 public class Screenshot {

@@ -7,6 +7,8 @@
     android:layout_marginEnd="8dp"
     app:cardElevation="8dp"
     app:cardCornerRadius="8dp"
+    android:backgroundTint="@color/transparent"
+    android:background="@color/transparent"
     android:layout_marginStart="8dp"
     android:id="@+id/Container">
 
@@ -15,17 +17,24 @@
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:orientation="vertical"
-        android:padding="8dp">
+        android:backgroundTint="@color/transparent"
+        android:background="@color/transparent"
+        android:padding="8dp"
+        >
+
         <ImageView
             android:id="@+id/imgPDF"
+            android:backgroundTint="@color/transparent"
+
             android:layout_width="match_parent"
             android:layout_height="150dp"
             android:layout_marginStart="5dp"
-            android:src="@drawable/pdficon"
-            >
+            android:src="@drawable/pdficon">
 
         </ImageView>
+
         <TextView
+            android:backgroundTint="@color/transparent"
             android:id="@+id/pdfName"
             android:layout_marginStart="5dp"
             android:layout_marginEnd="5dp"
@@ -33,6 +42,7 @@
             android:textColor="@android:color/black"
             android:text="PDF name"
             android:textSize="15sp"
+            android:textStyle="bold"
             android:singleLine="true"
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="marquee_forever"

@@ -152,13 +152,12 @@ public class PaintView extends View {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 touchStart(x, y);
-
                 break;
+
             case MotionEvent.ACTION_MOVE:
                 touchMove(x, y);
-
-
                 break;
+
             case MotionEvent.ACTION_UP:
                 touchUp();
                 break;

@@ -144,9 +144,9 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                // for statistics -- init
-                //imagesProduced = 0;
-                //startTimeInMills = System.currentTimeMillis();
+                //for statistics -- init
+                imagesProduced = 0;
+                startTimeInMills = System.currentTimeMillis();
 
                 mProjection = mProjectionManager.getMediaProjection(resultCode, data);
 
@@ -189,10 +189,10 @@ public class PresentationActivity extends AppCompatActivity implements OnPageCha
                                     dataSent = new JSONObject();
                                     dataSent.put("imageData", encImage);
                                     mSocket.emit("image", dataSent);
-                                    //imagesProduced++;
-                                    //final long now = System.currentTimeMillis();
-                                    //final long sampleTime = now - startTimeInMills;
-                                    //Log.e(TAG, "produced images at rate: " + (imagesProduced / (sampleTime / 1000.0f)) + " per sec");
+                                    imagesProduced++;
+                                    final long now = System.currentTimeMillis();
+                                    final long sampleTime = now - startTimeInMills;
+                                    Log.d(TAG, "Produced images at rate: " + (imagesProduced / (sampleTime / 1000.0f)) + " per sec");
                                 }
 
                             } catch (Exception e) {
